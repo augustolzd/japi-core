@@ -1,0 +1,63 @@
+:root {
+  /* Brand Colors */
+  --japi-color-primary-50: #eff6ff;
+  --japi-color-primary-100: #dbeafe;
+  --japi-color-primary-200: #bfdbfe;
+  --japi-color-primary-300: #93c5fd;
+  --japi-color-primary-400: #60a5fa;
+  --japi-color-primary-500: #3b82f6;
+  --japi-color-primary-600: #2563eb;
+  --japi-color-primary-700: #1d4ed8;
+  --japi-color-primary-800: #1e40af;
+  --japi-color-primary-900: #1e3a8a;
+  --japi-color-primary-950: #172554;
+
+  /* Neutral Colors */
+  --japi-color-neutral-0: #ffffff;
+  --japi-color-neutral-50: #f9fafb;
+  --japi-color-neutral-100: #f3f4f6;
+  --japi-color-neutral-200: #e5e7eb;
+  --japi-color-neutral-300: #d1d5db;
+  --japi-color-neutral-400: #9ca3af;
+  --japi-color-neutral-500: #6b7280;
+  --japi-color-neutral-600: #4b5563;
+  --japi-color-neutral-700: #374151;
+  --japi-color-neutral-800: #1f2937;
+  --japi-color-neutral-900: #111827;
+  --japi-color-neutral-950: #030712;
+
+  /* Semantic Colors */
+  --japi-color-success: #10b981;
+  --japi-color-warning: #f59e0b;
+  --japi-color-error: #ef4444;
+  --japi-color-info: #3b82f6;
+
+  /* Spacing */
+  --japi-spacing-1: 0.25rem;
+  --japi-spacing-2: 0.5rem;
+  --japi-spacing-3: 0.75rem;
+  --japi-spacing-4: 1rem;
+  --japi-spacing-5: 1.25rem;
+  --japi-spacing-6: 1.5rem;
+  --japi-spacing-8: 2rem;
+  --japi-spacing-10: 2.5rem;
+  --japi-spacing-12: 3rem;
+
+  /* Border Radius */
+  --japi-radius-sm: 0.25rem;
+  --japi-radius-md: 0.375rem;
+  --japi-radius-lg: 0.5rem;
+  --japi-radius-xl: 0.75rem;
+  --japi-radius-2xl: 1rem;
+  --japi-radius-full: 9999px;
+
+  /* Shadows */
+  --japi-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --japi-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --japi-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* Transitions */
+  --japi-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --japi-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --japi-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}

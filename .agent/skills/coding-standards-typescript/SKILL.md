@@ -1,30 +1,33 @@
-# Skill: Estándar de Codificación, Arquitectura y Reutilización (Japi Core)
+# Skill: Estándar de Codificación, Arquitectura y Estilo (Japi Core)
 
 ## 1. Tipado de Hierro y Rigurosidad
 * **Cero Supresión:** Prohibido `// @ts-ignore`, `// biome-ignore` o similares.
 * **Prohibido `any`:** Uso obligatorio de `unknown` + Type Guards o Valibot.
-* **Result Pattern:** Errores como valores, prohibido `throw` en lógica de negocio.
+* **Result Pattern:** Manejo de errores como valores; prohibido `throw` en lógica de negocio.
 
-## 2. Arquitectura de Frontend: "Single Source of Components"
-Para cumplir con el principio **DRY**, la construcción de interfaces en Japi Core se rige por:
+## 2. Estándar de Estilado: CSS Estructurado (No Utility-First)
+En Japi Core priorizamos la semántica y la mantenibilidad del diseño. Queda estrictamente PROHIBIDO el uso de Tailwind CSS, Bootstrap o estilos inline.
 
-* **Componentes Reutilizables:** Está estrictamente PROHIBIDO duplicar lógica de UI o estructuras HTML en `/apps`.
-* **Ubicación Centralizada:** Todo componente que se use más de una vez (botones, inputs, tablas, gráficas, layouts de tarjetas) DEBE residir en `packages/ui-system`.
-* **Atomic Design:** Organizar componentes en Átomos, Moléculas y Organismos para maximizar la composición.
-* **React Props Strict:** Los componentes de React deben usar interfaces de TypeScript exhaustivas. No se permite el uso de `any` en las props.
+* **Escritura Directa:** Se debe escribir CSS puro utilizando **CSS Modules** o bloques `<style>` de Astro.
+* **Custom Properties (Variables):** Todos los valores de marca (colores, espaciados, fuentes) deben residir en un archivo global de variables CSS (`:root`).
+* **Metodología BEM o Similar:** El CSS debe estar estructurado (ej. Block-Element-Modifier) para evitar colisiones de especificidad y asegurar que el código sea legible para humanos.
+* **Prohibido Inline CSS:** El atributo `style="..."` está vetado. Todo el estilo debe estar desacoplado del marcado.
 
 
 
-## 3. Estándares Web y CSS
-* **HTML Semántico:** Uso obligatorio de `<main>`, `<nav>`, `<article>`, etc. Prohibido el "Div-itis".
-* **Prohibido Inline CSS:** Todo el estilo debe ser vía Tailwind CSS o módulos CSS. El atributo `style` está vetado.
-* **Tailwind Consistency:** Las clases de Tailwind deben seguir el orden estándar de Biome para facilitar la lectura.
+## 3. Frontend: Atomic Design & Reutilización
+* **Componentes Reutilizables:** Prohibido duplicar lógica de UI o estructuras HTML en `/apps`. Todo componente común reside en `packages/ui-system`.
+* **HTML Semántico:** Uso obligatorio de etiquetas `<main>`, `<nav>`, `<section>`, `<article>`.
+* **Pureza de Componentes:** Los componentes en `ui-system` deben ser presentacionales y recibir estilos mediante sus propios archivos CSS desacoplados.
 
 ## 4. Principios SOLID, CLEAN & DRY
-* **Clean Architecture:** Separación clara entre Dominio (lógica 10^-7), Aplicación y Infraestructura (Kafka/Prisma).
-* **SOLID:** Funciones de una sola responsabilidad, inversión de dependencias y composición sobre herencia.
+* **Clean Architecture:** Separación estricta entre Dominio (lógica 10^-7), Aplicación e Infraestructura.
+* **SOLID:** Funciones de responsabilidad única e inversión de dependencias.
+* **DRY:** Abstracción total de lógica repetida en paquetes compartidos.
+
+
 
 ## 5. Reglas para el Agente en Antigravity
-1. **Detección de Duplicidad:** Si el agente va a crear un componente en una `app/`, debe verificar primero si existe en `packages/ui-system` o proponer su creación ahí directamente.
-2. **Propagación de Tipos:** Los componentes de React deben heredar los tipos de Valibot definidos en `packages/events-schema` para asegurar que el formulario coincida con el API.
-3. **Pureza de Componentes:** Los componentes en `ui-system` deben ser "puros" (presentacionales); la lógica de fetching de datos debe inyectarse o manejarse en los componentes de página de Astro.
+1. **Detección de Frameworks:** Si el agente intenta sugerir clases de Tailwind (ej. `flex items-center`), debe autocorregirse y proponer un bloque de CSS estructurado.
+2. **Modularidad:** El CSS debe vivir junto al componente (Component-scoped CSS) para facilitar la eliminación de código muerto (Dead Code Elimination).
+3. **Validación Biome:** Asegurar que el CSS cumpla con las reglas de formato y orden de Biome.

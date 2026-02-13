@@ -6,9 +6,7 @@
     ".": "./index.ts"
   },
   "dependencies": {
-    "react": "latest",
-    "tailwind-merge": "latest",
-    "clsx": "latest"
+    "react": "latest"
   },
   "devDependencies": {
     "typescript": "latest"

@@ -1,0 +1,64 @@
+@import "../styles/variables.css";
+
+.japi-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--japi-spacing-2) var(--japi-spacing-4);
+  border-radius: var(--japi-radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: var(--japi-transition-fast);
+  border: 1px solid transparent;
+  outline: none;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.japi-button:active {
+  transform: scale(0.98);
+}
+
+.japi-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.japi-button--primary {
+  background-color: var(--japi-color-primary-600);
+  color: var(--japi-color-neutral-0);
+  box-shadow: var(--japi-shadow-sm);
+}
+
+.japi-button--primary:hover {
+  background-color: var(--japi-color-primary-700);
+  box-shadow: var(--japi-shadow-md);
+}
+
+.japi-button--secondary {
+  background-color: var(--japi-color-neutral-100);
+  color: var(--japi-color-neutral-900);
+  border-color: var(--japi-color-neutral-200);
+}
+
+.japi-button--secondary:hover {
+  background-color: var(--japi-color-neutral-200);
+  border-color: var(--japi-color-neutral-300);
+}
+
+@media (prefers-color-scheme: dark) {
+  .japi-button--secondary {
+    background-color: var(--japi-color-neutral-800);
+    color: var(--japi-color-neutral-100);
+    border-color: var(--japi-color-neutral-700);
+  }
+
+  .japi-button--secondary:hover {
+    background-color: var(--japi-color-neutral-700);
+    border-color: var(--japi-color-neutral-600);
+  }
+}
