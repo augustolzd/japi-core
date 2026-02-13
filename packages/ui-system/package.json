@@ -1,0 +1,16 @@
+{
+  "name": "@japi/ui-system",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "react": "latest",
+    "tailwind-merge": "latest",
+    "clsx": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@japi/api-gateway",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist"
+  },
+  "dependencies": {
+    "hono": "latest",
+    "@hono/valibot-validator": "latest",
+    "valibot": "latest"
+  }
+}

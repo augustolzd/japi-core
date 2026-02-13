@@ -1,0 +1,19 @@
+{
+  "name": "japi-core",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "biome check .",
+    "format": "biome format . --write"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "latest",
+    "@biomejs/biome": "latest"
+  }
+}

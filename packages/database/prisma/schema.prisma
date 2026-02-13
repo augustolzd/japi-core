@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Skill: IAM y Control de Acceso
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  permissions Permission[]
+  auditLogs   AuditLog[]
+}
+
+model Permission {
+  id       String @id @default(uuid())
+  action   String // ej: "sms:send"
+  resource String // ej: "cost_center:uuid"
+  effect   String @default("allow")
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+}
+
+// Skill: Sistema de Auditoría
+model AuditLog {
+  id            String   @id @default(uuid())
+  entityName    String
+  entityId      String
+  action        String
+  oldValue      Json?
+  newValue      Json?
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  correlationId String
+  ipAddress     String?
+  createdAt     DateTime @default(now())
+
+  @@index([entityName, entityId])
+}
+
+// Skill: Maestro de Facturación
+model CostCenter {
+  id      String  @id @default(uuid())
+  name    String
+  balance BigInt  @default(0) // Micro-units 10^-7
+}

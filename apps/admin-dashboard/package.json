@@ -1,0 +1,20 @@
+{
+  "name": "@japi/admin-dashboard",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "latest",
+    "@astrojs/react": "latest",
+    "@astrojs/node": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwindcss": "latest",
+    "@japi/ui-system": "workspace:*"
+  }
+}
