@@ -1,0 +1,84 @@
+---
+import BillingLayout from '../layouts/BillingLayout.astro';
+import { Button } from '@japi/ui-system';
+import { PrismaClient } from '@japi/database';
+import * as jose from 'jose';
+
+const prisma = new PrismaClient();
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'auth-service-secret-key');
+
+const { user } = Astro.locals;
+
+// Fetch basic stats
+const spCount = await prisma.serviceProvider.count();
+const orgCount = await prisma.organization.count();
+const ccCount = await prisma.costCenter.count();
+
+// Calculate total balance (demo logic)
+const costCenters = await prisma.costCenter.findMany({ select: { balance: true } });
+const totalBalance = costCenters.reduce((acc, cc) => acc + Number(cc.balance), 0) / 10000000;
+---
+
+<BillingLayout title="Dashboard de Finanzas" userEmail={user?.email as string}>
+  <div class="stats-grid">
+    <div class="card">
+      <div class="stat-label">Entidades Facturadoras</div>
+      <div class="stat-value">{spCount}</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Organizaciones Activas</div>
+      <div class="stat-value">{orgCount}</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Centros de Costos</div>
+      <div class="stat-value">{ccCount}</div>
+    </div>
+    <div class="card highlight">
+      <div class="stat-label">Balance Total Consolidado</div>
+      <div class="stat-value">${totalBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Acciones Rápidas</h2>
+    <div class="action-buttons">
+      <a href="/entities"><Button variant="primary">Configurar Entidades</Button></a>
+      <a href="/organizations"><Button variant="secondary">Cuentas de Clientes</Button></a>
+      <a href="/cost-centers"><Button variant="secondary">Gestión de Unidades</Button></a>
+    </div>
+  </div>
+</BillingLayout>
+
+<style>
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--japi-color-neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--japi-spacing-2);
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--japi-color-neutral-900);
+  }
+  .card.highlight {
+    background: linear-gradient(135deg, var(--japi-color-primary-600), var(--japi-color-primary-700));
+  }
+  .card.highlight .stat-label {
+    color: rgba(255,255,255,0.8);
+  }
+  .card.highlight .stat-value {
+    color: white;
+  }
+  .action-buttons {
+    display: flex;
+    gap: var(--japi-spacing-4);
+    margin-top: var(--japi-spacing-4);
+  }
+  h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,8 @@
+{
+  "name": "@japi/events-schema",
+  "type": "module",
+  "main": "./index.ts",
+  "dependencies": {
+    "valibot": "latest"
+  }
+}

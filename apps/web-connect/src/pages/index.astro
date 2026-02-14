@@ -1,0 +1,253 @@
+---
+import { Button } from '@japi/ui-system';
+import '@japi/ui-system/styles/variables.css';
+import * as jose from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'auth-service-secret-key');
+
+const { user } = Astro.locals;
+---
+
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Connect Web - Japi</title>
+</head>
+<body class="japi-body">
+  <main class="page-container">
+    <header class="header">
+      <h1 class="title">Japi Connect</h1>
+      <div class="user-status">
+        {user ? (
+          <div class="user-info">
+            <span class="user-name">Hola, {user.email.split('@')[0]}!</span>
+            <button id="logout-btn" class="logout-link">Cerrar Sesión</button>
+          </div>
+        ) : (
+          <span class="status-badge">No autenticado</span>
+        )}
+      </div>
+    </header>
+
+    <section class="hero">
+      {user ? (
+        <div class="welcome-box">
+          <h2>Panel de Campañas</h2>
+          <p>Gestiona tus envíos y revisa resultados: <strong>{user.email}</strong>.</p>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-value">0</span>
+              <span class="stat-label">Comunicaciones Enviadas</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">0%</span>
+              <span class="stat-label">Tasa de Entrega</span>
+            </div>
+          </div>
+          <div class="actions">
+             <Button variant="primary">Nueva Campaña</Button>
+             <Button variant="secondary">Ver Reportes</Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h2>Bienvenido al Portal Japi Connect</h2>
+          <p>Crea campañas multicanal (SMS, RCS, Email) y mide tus resultados en tiempo real.</p>
+          
+          <div class="actions">
+            <a href="http://localhost:4323/register?returnTo=http://localhost:4322">
+              <Button variant="primary">Empezar ahora</Button>
+            </a>
+            <a href="http://localhost:4323/login?returnTo=http://localhost:4322">
+              <Button variant="secondary">Iniciar Sesión</Button>
+            </a>
+          </div>
+        </>
+      )}
+    </section>
+  </main>
+
+  <script>
+    // Session Guardian: Evita el spam de 401 y el "atrás" fantasma
+    async function checkSession() {
+      const token = document.cookie.split('; ').find(row => row.startsWith('japi_token='))?.split('=')[1];
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:4323/api/verify-session', {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          console.warn('Master session invalid, cleaning up...');
+          // Limpieza agresiva para romper el loop
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+          }
+          window.location.href = 'http://localhost:4323/login?returnTo=' + encodeURIComponent(window.location.href);
+        }
+      } catch (err) {
+        console.error('Guardian check failed:', err);
+      }
+    }
+
+    // Solo ejecutar si hay un token sospechoso
+    checkSession();
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) checkSession();
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Limpieza agresiva inmediata
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+      }
+      
+      window.location.href = 'http://localhost:4323/logout?returnTo=' + encodeURIComponent('http://localhost:4322');
+    });
+  </script>
+</body>
+
+</html>
+
+<style>
+  :root {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .japi-body {
+    background-color: var(--japi-color-neutral-50);
+    margin: 0;
+    color: var(--japi-color-neutral-900);
+  }
+  .page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--japi-spacing-8);
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--japi-spacing-12);
+  }
+  .title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--japi-color-primary-600), var(--japi-color-primary-800));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero {
+    text-align: center;
+    padding: var(--japi-spacing-12) 0;
+  }
+  .hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: var(--japi-spacing-4);
+  }
+  .actions {
+    display: flex;
+    gap: var(--japi-spacing-4);
+    justify-content: center;
+    margin-top: var(--japi-spacing-8);
+  }
+  .status-badge {
+    background-color: var(--japi-color-error);
+    color: white;
+    padding: var(--japi-spacing-1) var(--japi-spacing-3);
+    border-radius: var(--japi-radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--japi-spacing-4);
+  }
+
+  .user-name {
+    font-weight: 600;
+    color: var(--japi-color-neutral-700);
+  }
+
+  .logout-link {
+    background: none;
+    border: none;
+    color: var(--japi-color-error);
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+
+  .welcome-box {
+    background: var(--japi-color-neutral-0);
+    padding: var(--japi-spacing-8);
+    border-radius: var(--japi-radius-xl);
+    border: 1px solid var(--japi-color-neutral-200);
+    box-shadow: var(--japi-shadow-lg);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--japi-spacing-4);
+    margin-top: var(--japi-spacing-6);
+  }
+
+  .stat-card {
+    background: var(--japi-color-neutral-50);
+    padding: var(--japi-spacing-4);
+    border-radius: var(--japi-radius-lg);
+    border: 1px solid var(--japi-color-neutral-100);
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--japi-color-primary-600);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--japi-color-neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .japi-body {
+      background-color: var(--japi-color-neutral-950);
+      color: var(--japi-color-neutral-100);
+    }
+    .user-name {
+      color: var(--japi-color-neutral-300);
+    }
+    .welcome-box {
+      background: var(--japi-color-neutral-900);
+      border-color: var(--japi-color-neutral-800);
+    }
+    .stat-card {
+      background: var(--japi-color-neutral-800);
+      border-color: var(--japi-color-neutral-700);
+    }
+  }
+</style>
+

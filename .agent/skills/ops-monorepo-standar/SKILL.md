@@ -1,36 +1,45 @@
-# Skill: Estándar de Monorepo y Stack Tecnológico (Japi Core)
+# Skill: Estándar de Monorepo y Operaciones de Infraestructura (Japi Core)
 
-## 1. Identidad del Proyecto
-* **Nombre del Proyecto:** Japi Core
-* **Visión:** Motor central de infraestructura para Japifon (Carrier) y Japi Connect (Plataforma).
-* **Guía de Estilo:** Código limpio, tipado estricto y alto rendimiento (Zero-Node).
+## 1. Identidad y Filosofía del Proyecto
+* **Nombre:** Japi Core.
+* **Misión:** Infraestructura carrier-grade para Japifon y Japi Connect.
+* **Principios:** Tipado de Hierro, Clean Architecture, SOLID, DRY y Escritura para Humanos.
 
 ## 2. Stack Tecnológico Mandatorio (Stack "Japi")
-El agente NO debe sugerir herramientas fuera de esta lista:
-* **Runtime:** [Bun](https://bun.sh/) (Gestión de paquetes, ejecución y tests).
-* **Web Framework:** [Astro](https://astro.build/) (Modo SSR para Dashboards y Portales).
-* **Backend Framework:** [Hono](https://hono.dev/) (APIs, Gateways y Middleware).
-* **Linter & Formatter:** [Biome](https://biomejs.dev/) (Única herramienta de calidad de código).
-* **Monorepo:** [Turborepo](https://turbo.build/).
-* **ORM:** [Prisma](https://www.prisma.io/) con PostgreSQL.
-* **Mensajería:** [Kafka](https://kafka.apache.org/) (Eventos masivos) y [Redis](https://redis.io/) (Caché de saldos y precios).
+* **Runtime:** Bun.
+* **Web:** Astro (SSR) + React (Atomic Design).
+* **Backend:** Hono (Ultra-high performance).
+* **Linter/Formatter:** Biome (Sin excepciones).
+* **Database:** PostgreSQL (Partitioned) + Prisma ORM.
+* **Cache/Real-time:** Redis + Kafka.
 
-## 3. Estructura de Directorios (Japi Core)
-El agente debe organizar cualquier propuesta de archivos bajo esta jerarquía:
+## 3. Arquitectura de Base de Datos y Persistencia Masiva
+Para soportar el tráfico de Japifon (>80M de registros mensuales por cliente), se aplican las siguientes reglas de infraestructura:
 
+### A. Particionamiento Compuesto (Composite Partitioning)
+Todo log de tráfico (SMS, RCS, etc.) debe seguir esta jerarquía física:
+1. **Nivel 1 (Range):** Mensual por `created_at`. Facilita el borrado de datos viejos (Retention Policy).
+2. **Nivel 2 (Hash):** Por `cost_center_id` en **4 buckets (sub-particiones)**. Garantiza que la carga de clientes masivos se distribuya y los índices quepan en RAM.
+
+### B. Reglas de Consulta (Query Safety)
+* **Poda de Particiones:** Está prohibido realizar queries a tablas particionadas sin filtrar por `created_at` (rango de tiempo) y `cost_center_id` simultáneamente.
+* **No Table Scans:** El agente debe asegurar que cada consulta sea dirigida a una partición específica para evitar el escaneo de millones de registros.
+
+### C. Automatización de Infraestructura
+* **Gestión de Particiones:** El sistema debe contar con una tarea programada (Cron en Bun) que pre-cree automáticamente la partición del mes siguiente y sus 4 sub-particiones de Hash antes de que inicie el periodo.
+* **Cold Storage:** Implementar lógica para mover particiones de más de 3 meses a Tablespaces de menor costo (SSD/HDD) o archivado en frío.
+
+## 4. Estructura de Directorios del Monorepo
 ```text
 /japi-core
   ├── /apps
-  │   ├── /api-gateway      # Hono (Punto de entrada SMS/RCS/Email)
-  │   ├── /billing-engine   # Hono (Consumidor de Kafka y lógica de saldos)
-  │   ├── /admin-dashboard  # Astro + React (Panel Interno Japifon)
-  │   └── /connect-web      # Astro + React (Portal de Clientes Japi Connect)
+  │   ├── /api-gateway      # Hono
+  │   ├── /billing-engine   # Consumo Kafka + Aritmética 10^-7
+  │   ├── /admin-dashboard  # Astro (Panel Interno)
   ├── /packages
-  │   ├── /database         # Esquema de Prisma y Cliente compartido
-  │   ├── /events-schema    # Definiciones Zod para eventos de Kafka
-  │   ├── /ui-system        # Design System (Tailwind + Astro Islands)
-  │   ├── /telecom-logic    # Lógica de Zonas 2-9 e inteligencia de rutas
-  │   └── /shared-utils     # Helpers de moneda (BigInt) y loggers
-  ├── biome.json            # Configuración de estilo unificada
-  ├── turbo.json            # Pipelines de construcción
-  └── bun.lockb             # Lockfile único de Bun
+  │   ├── /database         # Prisma + Lógica de Particionado
+  │   ├── /events-schema    # Valibot Contracts
+  │   ├── /ui-system        # React + CSS Puro (BEM)
+  │   └── /shared-utils     # BigInt, Result Pattern, Logger
+  ├── PRODUCT.md            # Visión comercial
+  └── SYSTEM.md             # Capacidades técnicas

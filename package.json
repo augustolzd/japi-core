@@ -1,12 +1,16 @@
 {
   "name": "japi-core",
   "private": true,
+  "packageManager": "bun@1.2.22",
   "type": "module",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "biome check .",
-    "format": "biome format . --write"
+    "format": "biome format . --write",
+    "infra:up": "docker-compose up -d",
+    "infra:down": "docker-compose down",
+    "infra:logs": "docker-compose logs -f"
   },
   "workspaces": [
     "apps/*",

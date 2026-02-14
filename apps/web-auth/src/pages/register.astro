@@ -1,0 +1,59 @@
+---
+import { RegisterForm } from '../components/RegisterForm';
+import Layout from '../layouts/Layout.astro';
+import '@japi/ui-system/styles/variables.css';
+import * as jose from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'auth-service-secret-key');
+const token = Astro.cookies.get('japi_token')?.value;
+const returnTo = Astro.url.searchParams.get('returnTo') || 'http://localhost:4322';
+
+if (token) {
+  try {
+    await jose.jwtVerify(token, JWT_SECRET);
+    const redirectUrl = new URL(returnTo);
+    redirectUrl.searchParams.set('token', token);
+    return Astro.redirect(redirectUrl.toString());
+  } catch (_e) {
+    Astro.cookies.delete('japi_token', { path: '/' });
+  }
+}
+---
+
+<Layout title="Registro - Japi Auth">
+  <main>
+    <section class="auth-wrapper">
+      <RegisterForm client:load />
+      <p class="login-link">
+        ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+      </p>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .auth-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--japi-spacing-4);
+  }
+  
+  .login-link {
+    margin-top: var(--japi-spacing-4);
+    font-size: 0.875rem;
+    color: var(--japi-color-neutral-600);
+  }
+  
+  .login-link a {
+    color: var(--japi-color-primary-600);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+</style>

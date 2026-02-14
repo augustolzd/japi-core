@@ -1,0 +1,20 @@
+{
+  "name": "@japi/web-admin",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "latest",
+    "@astrojs/react": "latest",
+    "@japi/ui-system": "workspace:*",
+    "astro": "latest",
+    "jose": "^6.1.3",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}

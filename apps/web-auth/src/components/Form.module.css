@@ -1,0 +1,78 @@
+.form-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--japi-color-neutral-0);
+  border-radius: var(--japi-radius-lg);
+  box-shadow: var(--japi-shadow-md);
+  border: 1px solid var(--japi-color-neutral-200);
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--japi-color-neutral-900);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--japi-color-neutral-700);
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--japi-radius-md);
+  border: 1px solid var(--japi-color-neutral-300);
+  background-color: var(--japi-color-neutral-50);
+  font-size: 1rem;
+  color: var(--japi-color-neutral-900);
+  transition: var(--japi-transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--japi-color-primary-500);
+  box-shadow: 0 0 0 3px var(--japi-color-primary-100);
+}
+
+.form-error {
+  color: var(--japi-color-error);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.form-footer {
+  margin-top: 1.5rem;
+}
+
+.form-button {
+  width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .form-container {
+    background: var(--japi-color-neutral-900);
+    border-color: var(--japi-color-neutral-800);
+  }
+  .form-title {
+    color: var(--japi-color-neutral-0);
+  }
+  .form-label {
+    color: var(--japi-color-neutral-300);
+  }
+  .form-input {
+    background-color: var(--japi-color-neutral-800);
+    border-color: var(--japi-color-neutral-700);
+    color: var(--japi-color-neutral-0);
+  }
+}

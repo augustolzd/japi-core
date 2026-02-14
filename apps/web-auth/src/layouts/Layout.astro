@@ -1,0 +1,41 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Japi Auth - Central Identity Provider" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+<style is:global>
+	:root {
+		font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	}
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+	body {
+		background-color: var(--japi-color-neutral-50);
+		color: var(--japi-color-neutral-950);
+	}
+	@media (prefers-color-scheme: dark) {
+		body {
+			background-color: var(--japi-color-neutral-950);
+		}
+	}
+</style>

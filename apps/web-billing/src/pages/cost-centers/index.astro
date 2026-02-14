@@ -1,0 +1,90 @@
+---
+import BillingLayout from '../../layouts/BillingLayout.astro';
+import { Button } from '@japi/ui-system';
+import { PrismaClient } from '@japi/database';
+
+const prisma = new PrismaClient();
+const { user } = Astro.locals;
+
+const costCenters = await prisma.costCenter.findMany({
+  include: {
+    organization: true,
+  },
+  orderBy: { organization: { name: 'asc' } },
+});
+
+const formatBalance = (val: bigint) =>
+  (Number(val) / 10000000).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+---
+
+<BillingLayout title="Centros de Costos" userEmail={user?.email as string}>
+  <div class="card">
+    <div class="table-header">
+      <p>Nivel 3: Unidades operativas con balance independiente vinculadas a una Organización.</p>
+      <a href="/cost-centers/new">
+        <Button variant="primary">+ Nueva Unidad</Button>
+      </a>
+    </div>
+    
+    <table class="japi-table">
+      <thead>
+        <tr>
+          <th>Nombre del Centro</th>
+          <th>Organización Padre</th>
+          <th>Balance Actual</th>
+          <th>Fecha Creación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {costCenters.map(cc => (
+          <tr>
+            <td><strong>{cc.name}</strong></td>
+            <td>{cc.organization.name}</td>
+            <td class="balance-cell">{formatBalance(cc.balance)}</td>
+            <td>{cc.createdAt.toLocaleDateString()}</td>
+            <td>
+              <Button variant="secondary">Recargar</Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</BillingLayout>
+
+<style>
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--japi-spacing-6);
+  }
+  .table-header p {
+    color: var(--japi-color-neutral-500);
+    margin: 0;
+  }
+  .japi-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .japi-table th {
+    padding: var(--japi-spacing-4);
+    border-bottom: 2px solid var(--japi-color-neutral-100);
+    color: var(--japi-color-neutral-500);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .japi-table td {
+    padding: var(--japi-spacing-4);
+    border-bottom: 1px solid var(--japi-color-neutral-100);
+    font-size: 0.9375rem;
+  }
+  .balance-cell {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--japi-color-primary-600);
+  }
+</style>

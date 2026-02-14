@@ -25,6 +25,6 @@ app.get('/health', (c) => {
 });
 
 export default {
-  port: 3000,
+  port: Number(Bun.env.PORT) || 3000,
   fetch: app.fetch,
 };

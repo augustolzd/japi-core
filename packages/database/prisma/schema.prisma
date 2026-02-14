@@ -1,27 +1,83 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["iam", "billing", "traffic", "config"]
 }
 
 // Skill: IAM y Control de Acceso
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
-  permissions Permission[]
-  auditLogs   AuditLog[]
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  role         String       @default("user") // "japi_admin" (Global), "user"
+  organizations UserOrganization[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("users")
+  @@schema("iam")
 }
 
-model Permission {
-  id       String @id @default(uuid())
-  action   String // ej: "sms:send"
-  resource String // ej: "cost_center:uuid"
-  effect   String @default("allow")
-  userId   String
-  user     User   @relation(fields: [userId], references: [id])
+model UserOrganization {
+  id             String       @id @default(uuid())
+  userId         String
+  organizationId String
+  role           String       @default("org_admin") // "org_admin", "org_operator"
+  user           User         @relation(fields: [userId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+  @@map("user_organizations")
+  @@schema("iam")
+}
+
+// Skill: Jerarquía de Negocio
+model ServiceProvider {
+  id            String         @id @default(uuid())
+  name          String         // Japifon, Rocatell, etc.
+  taxId         String?        @unique // RFC/Tax ID de la entidad facturadora
+  organizations Organization[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("service_providers")
+  @@schema("iam")
+}
+
+model Organization {
+  id                String            @id @default(uuid())
+  name              String            // Entidad legal del cliente
+  taxId             String?           @unique // RFC/Tax ID del cliente
+  serviceProviderId String
+  serviceProvider   ServiceProvider   @relation(fields: [serviceProviderId], references: [id])
+  costCenters       CostCenter[]
+  users             UserOrganization[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("organizations")
+  @@schema("iam")
+}
+
+model CostCenter {
+  id             String       @id @default(uuid())
+  name           String
+  balance        BigInt       @default(0) // Micro-units 10^-7
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("cost_centers")
+  @@schema("billing")
 }
 
 // Skill: Sistema de Auditoría
@@ -34,16 +90,13 @@ model AuditLog {
   newValue      Json?
   userId        String?
   user          User?    @relation(fields: [userId], references: [id])
+  organizationId String? // Para aislamiento multi-tenant en logs
   correlationId String
   ipAddress     String?
   createdAt     DateTime @default(now())
 
   @@index([entityName, entityId])
-}
-
-// Skill: Maestro de Facturación
-model CostCenter {
-  id      String  @id @default(uuid())
-  name    String
-  balance BigInt  @default(0) // Micro-units 10^-7
+  @@index([organizationId])
+  @@map("audit_logs")
+  @@schema("iam")
 }

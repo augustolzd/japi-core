@@ -1,0 +1,85 @@
+---
+import BillingLayout from '../../layouts/BillingLayout.astro';
+import { Button } from '@japi/ui-system';
+import { PrismaClient } from '@japi/database';
+
+const prisma = new PrismaClient();
+const { user } = Astro.locals;
+
+const entities = await prisma.serviceProvider.findMany({
+  include: {
+    _count: {
+      select: { organizations: true },
+    },
+  },
+  orderBy: { name: 'asc' },
+});
+---
+
+<BillingLayout title="Entidades Facturadoras" userEmail={user?.email}>
+  <div class="card">
+    <div class="table-header">
+      <p>Nivel 1: Proveedores de servicio que emiten facturas legales.</p>
+      <Button variant="primary">+ Nueva Entidad</Button>
+    </div>
+    
+    <table class="japi-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>RFC / Tax ID</th>
+          <th>Organizaciones</th>
+          <th>Fecha Registro</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {entities.map(entity => (
+          <tr>
+            <td><strong>{entity.name}</strong></td>
+            <td><code>{entity.taxId}</code></td>
+            <td>{entity._count.organizations}</td>
+            <td>{entity.createdAt.toLocaleDateString()}</td>
+            <td>
+              <Button variant="secondary">Editar</Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</BillingLayout>
+
+<style>
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--japi-spacing-6);
+  }
+  .table-header p {
+    color: var(--japi-color-neutral-500);
+    margin: 0;
+  }
+  .japi-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .japi-table th {
+    padding: var(--japi-spacing-4);
+    border-bottom: 2px solid var(--japi-color-neutral-100);
+    color: var(--japi-color-neutral-500);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .japi-table td {
+    padding: var(--japi-spacing-4);
+    border-bottom: 1px solid var(--japi-color-neutral-100);
+    font-size: 0.9375rem;
+  }
+  .japi-table tr:hover {
+    background: var(--japi-color-neutral-50);
+  }
+</style>

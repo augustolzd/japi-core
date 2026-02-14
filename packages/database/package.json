@@ -1,14 +1,19 @@
 {
   "name": "@japi/database",
   "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "db:generate": "prisma generate",
     "db:push": "prisma db push"
   },
   "dependencies": {
-    "@prisma/client": "latest"
+    "@prisma/client": "^6.0.0"
   },
   "devDependencies": {
-    "prisma": "latest"
+    "prisma": "^6.0.0"
   }
 }

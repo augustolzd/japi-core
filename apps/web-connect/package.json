@@ -1,5 +1,5 @@
 {
-  "name": "@japi/admin-dashboard",
+  "name": "@japi/web-connect",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -9,11 +9,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "latest",
-    "@astrojs/react": "latest",
     "@astrojs/node": "latest",
+    "@astrojs/react": "latest",
+    "@japi/events-schema": "workspace:*",
+    "@japi/ui-system": "workspace:*",
+    "astro": "latest",
+    "jose": "^6.1.3",
     "react": "latest",
     "react-dom": "latest",
-    "@japi/ui-system": "workspace:*"
+    "valibot": "latest"
   }
 }

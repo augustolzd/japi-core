@@ -8,4 +8,8 @@ export default defineConfig({
     mode: 'standalone',
   }),
   integrations: [react()],
+  server: {
+    port: 4324,
+    host: '127.0.0.1',
+  },
 });

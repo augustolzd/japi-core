@@ -1,0 +1,221 @@
+---
+import { Button } from '@japi/ui-system';
+import '@japi/ui-system/styles/variables.css';
+
+interface Props {
+  title: string;
+  userEmail?: string;
+}
+
+const { title, userEmail } = Astro.props;
+
+// Anti-BFCache: Forzar al navegador a re-validar la página siempre
+Astro.response.headers.set(
+  'Cache-Control',
+  'no-store, no-cache, must-revalidate, proxy-revalidate',
+);
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
+---
+
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} - Japi Billing</title>
+</head>
+<body class="japi-body">
+  <div class="billing-container">
+    <aside class="sidebar">
+      <div class="logo">Japi Billing</div>
+      <nav class="nav">
+        <a href="/" class="nav-item">Dashboard</a>
+        <a href="/entities" class="nav-item">Entidades Facturadoras</a>
+        <a href="/organizations" class="nav-item">Organizaciones</a>
+        <a href="/cost-centers" class="nav-item">Centros de Costos</a>
+        <hr class="divider" />
+        <a href="http://localhost:4323" class="nav-item back-portal">Volver al Portal</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <span class="email">{userEmail || 'Usuario'}</span>
+          <button id="logout-btn" class="logout-link">Salir</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="page-header">
+        <h1>{title}</h1>
+      </header>
+      <slot />
+    </main>
+  </div>
+
+  <script>
+    // Session Guardian: Evita el "fantasma" de sesión al usar el botón atrás del navegador
+    async function checkSession() {
+      // Intentamos obtener la cookie local
+      const token = document.cookie.split('; ').find(row => row.startsWith('japi_token='))?.split('=')[1];
+      if (!token) {
+        // Si no hay token local pero parece que estamos en una página protegida, recargamos
+        if (window.location.pathname !== '/login') {
+           console.log('No token found, ensuring cleanup...');
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:4323/api/verify-session', {
+          credentials: 'include' // Importante para enviar cookies cross-origin
+        });
+
+        if (!response.ok) {
+          console.warn('Master session invalid, logging out...');
+          // Limpieza agresiva de cookies locales
+          document.cookie = "japi_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
+          document.cookie = "japi_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          window.location.href = 'http://localhost:4323/login?returnTo=' + encodeURIComponent(window.location.href);
+        }
+      } catch (err) {
+        console.error('Guardian check failed:', err);
+      }
+    }
+
+    // Ejecutar al cargar y cuando la pestaña vuelve a tener foco (ej: volver atrás)
+    checkSession();
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) { // Si viene del BFCache (botón atrás)
+        checkSession();
+      }
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Logging out globally...');
+      
+      // 1. Limpieza local total inmediata (Cookies y SessionStorage)
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+      }
+      sessionStorage.clear();
+      localStorage.removeItem('japi_token'); // Por si acaso se guardó algo ahí
+
+      // 2. Redirigir al logout central que es el "Source of Truth"
+      window.location.href = 'http://localhost:4323/logout?returnTo=' + encodeURIComponent('http://localhost:4323/login');
+    });
+  </script>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .japi-body {
+    background-color: var(--japi-color-neutral-50);
+    margin: 0;
+    color: var(--japi-color-neutral-900);
+  }
+  .billing-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 280px;
+    background: white;
+    border-right: 1px solid var(--japi-color-neutral-200);
+    display: flex;
+    flex-direction: column;
+    padding: var(--japi-spacing-6);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: var(--japi-spacing-10);
+    color: var(--japi-color-primary-700);
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--japi-spacing-2);
+    flex: 1;
+  }
+  .nav-item {
+    padding: var(--japi-spacing-3) var(--japi-spacing-4);
+    border-radius: var(--japi-radius-lg);
+    text-decoration: none;
+    color: var(--japi-color-neutral-600);
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .nav-item:hover {
+    background: var(--japi-color-neutral-50);
+    color: var(--japi-color-primary-600);
+  }
+  .divider {
+    border: 0;
+    border-top: 1px solid var(--japi-color-neutral-100);
+    margin: var(--japi-spacing-4) 0;
+  }
+  .content {
+    flex: 1;
+    padding: var(--japi-spacing-10);
+    overflow-y: auto;
+  }
+  .page-header {
+    margin-bottom: var(--japi-spacing-8);
+  }
+  .page-header h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .sidebar-footer {
+    padding-top: var(--japi-spacing-4);
+    border-top: 1px solid var(--japi-color-neutral-100);
+  }
+  .user-chip {
+    display: flex;
+    flex-direction: column;
+    gap: var(--japi-spacing-1);
+  }
+  .email {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--japi-color-neutral-700);
+  }
+  .logout-link {
+    background: none;
+    border: none;
+    color: var(--japi-color-error);
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  /* Shared Components Styles */
+  .card {
+    background: white;
+    border: 1px solid var(--japi-color-neutral-200);
+    border-radius: var(--japi-radius-xl);
+    padding: var(--japi-spacing-6);
+    box-shadow: var(--japi-shadow-sm);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--japi-spacing-6);
+    margin-bottom: var(--japi-spacing-10);
+  }
+</style>

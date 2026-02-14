@@ -1,0 +1,185 @@
+---
+import * as jose from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'auth-service-secret-key');
+const token = Astro.cookies.get('japi_token')?.value;
+
+let user = null;
+if (token) {
+  try {
+    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+    user = payload;
+  } catch (_e) {
+    Astro.cookies.delete('japi_token', { path: '/' });
+  }
+}
+---
+
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Japi Identity Portal</title>
+</head>
+<body class="japi-body">
+  <main class="page-container">
+    <header class="header">
+      <h1 class="logo">Japi Identity</h1>
+      {user && (
+        <div class="user-chip">
+          <span>{user.email}</span>
+          <a href="/logout" class="logout-btn">Salir</a>
+        </div>
+      )}
+    </header>
+
+    <div class="launcher-grid">
+      {!user ? (
+        <div class="auth-box">
+          <h2>Bienvenido</h2>
+          <p>Para acceder al ecosistema Japi, por favor inicia sesión.</p>
+          <a href="/login?returnTo=http://localhost:4323" class="login-prompt">Iniciar Sesión</a>
+        </div>
+      ) : (
+        <>
+          <a href="http://localhost:4325" class="app-card iam">
+            <div class="app-icon iam"></div>
+            <h3>Japi Console</h3>
+            <p><strong>El Cerebro:</strong> Control de accesos e IAM.</p>
+          </a>
+
+          <a href="http://localhost:4324" class="app-card billing">
+            <div class="app-icon billing"></div>
+            <h3>Japi Billing</h3>
+            <p><strong>El Libro Contable:</strong> Finanzas y facturación.</p>
+          </a>
+
+          <a href="http://localhost:4322" class="app-card campaigns">
+            <div class="app-icon campaigns"></div>
+            <h3>Japi Connect</h3>
+            <p><strong>La Generadora:</strong> Marketing y Campañas.</p>
+          </a>
+
+          <a href="http://localhost:4321" class="app-card admin secondary">
+            <div class="app-icon infra"></div>
+            <h3>Infra Console</h3>
+            <p>Monitoreo técnico de sistemas.</p>
+          </a>
+        </>
+      )}
+    </div>
+  </main>
+</body>
+</html>
+
+<style>
+  :root {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .japi-body {
+    background-color: #f8fafc;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .page-container {
+    max-width: 900px;
+    width: 100%;
+    padding: 2rem;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+  .launcher-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+  .app-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .app-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    border-color: #3b82f6;
+  }
+  .app-card h3 {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+  .app-card p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+  }
+  .app-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    background: #f1f5f9;
+  }
+  .campaigns { background: #dbeafe; }
+  .billing { background: #dcfce7; }
+  .iam { background: #fef9c3; }
+  .app-card.secondary {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  .app-card.secondary:hover {
+    opacity: 1;
+    transform: scale(1);
+    border-color: #ef4444;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #475569;
+  }
+  .logout-btn {
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .auth-box {
+    grid-column: 1 / -1;
+    text-align: center;
+    background: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+  }
+  .login-prompt {
+    display: inline-block;
+    margin-top: 1.5rem;
+    background: #0f172a;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 600;
+  }
+</style>

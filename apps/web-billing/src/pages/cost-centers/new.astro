@@ -1,0 +1,28 @@
+---
+import BillingLayout from '../../layouts/BillingLayout.astro';
+import { CreateCostCenterForm } from '../../components/CreateCostCenterForm';
+
+const { user } = Astro.locals;
+---
+
+<BillingLayout title="Nuevo Centro de Costos" userEmail={user?.email as string}>
+  <div class="card">
+    <p class="description">
+      Nivel 3: Crea una unidad operativa para segmentar consumos y asignar presupuestos específicos dentro de una organización.
+    </p>
+    <hr class="divider" />
+    <CreateCostCenterForm client:load />
+  </div>
+</BillingLayout>
+
+<style>
+  .description {
+    color: var(--japi-color-neutral-500);
+    margin-bottom: 1.5rem;
+  }
+  .divider {
+    border: 0;
+    border-top: 1px solid var(--japi-color-neutral-100);
+    margin-bottom: 2rem;
+  }
+</style>
