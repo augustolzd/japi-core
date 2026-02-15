@@ -1,33 +1,46 @@
 # Skill: Estándar de Documentación de Producto y Sistema (Japi Core)
 
 ## 1. El Manifiesto de Documentación
-En Japi Core, cada módulo, aplicación o paquete dentro del monorepo DEBE contener dos archivos fundamentales en su raíz para garantizar la alineación entre negocio y tecnología.
+En Japi Core, el conocimiento no es opcional. Cada aplicación, paquete o módulo dentro del monorepo DEBE tener una carpeta dedicada a la documentación para garantizar la alineación entre la visión de negocio y la ejecución técnica.
 
-## 2. PRODUCT.md: Visión y Valor Comercial
-Este archivo describe el "QUÉ" y el "PARA QUÉ" desde una perspectiva de producto y mercado.
-* **Propósito:** Definir el valor que entrega el módulo al cliente final o a Japifon.
-* **Secciones Obligatorias:**
-    - **User Personas:** ¿Quién usa esta función? (ej: Operador de Tráfico, Desarrollador Externo).
-    - **Business Value:** ¿Cómo impacta esto en el ingreso o ahorro de la compañía?
-    - **Feature List:** Listado de capacidades comerciales (ej: "Envío masivo programado", "Reporte de entrega en tiempo real").
-    - **KPIs:** ¿Qué métricas de negocio mide este componente? (ej: "Tasa de entrega (DLR)", "Latencia de facturación").
+## 2. Estructura de Almacenamiento
+Toda la documentación debe residir en directorios específicos llamados `docs/`:
 
+* **Documentación Global (Raíz):** `japi-core/docs/`
+    - Contiene el resumen general de todo el ecosistema (Japifon, Rocatell, Digi).
+* **Documentación de Módulo/App:** `[path/to/module]/docs/`
+    - Ejemplo: `apps/billing/docs/PRODUCT.md` o `packages/database/docs/SYSTEM.md`.
 
+---
 
-## 3. SYSTEM.md: Lógica y Capacidades Técnicas
-Este archivo describe el "CÓMO" y el "CON QUÉ" desde una perspectiva de ingeniería y arquitectura.
-* **Propósito:** Documentar la lógica interna, flujos de datos y límites técnicos.
-* **Secciones Obligatorias:**
-    - **Domain Logic:** Descripción detallada de las reglas de negocio (ej: "Cálculo de tarifas con escala 10^-7", "Algoritmo de priorización en Binds").
-    - **System Capabilities:** Capacidades técnicas (ej: "Procesamiento de 5,000 TPS", "Persistencia en frío tras 12 meses").
-    - **Data Flow:** Diagrama o explicación de cómo fluye la información entre Kafka, Redis y Postgres.
-    - **Security & IAM:** Niveles de permisos requeridos para interactuar con este sistema.
-    - **Error Handling:** Diccionario de errores técnicos y su significado operativo.
+## 3. Definición de Archivos Fundamentales
 
+### A. PRODUCT.md (El "QUÉ" y "PARA QUÉ")
+Describe el valor comercial desde una perspectiva de producto y mercado.
+* **User Personas:** ¿Quién usa esta función? (ej: Operador de Tráfico, CFO).
+* **Business Value:** Impacto en ingresos, ahorro o cumplimiento legal.
+* **Feature List:** Capacidades comerciales tangibles.
+* **KPIs:** Métricas de éxito (ej: Latencia de cobro, tasa de entrega).
 
+### B. SYSTEM.md (El "CÓMO" y "CON QUÉ")
+Describe la arquitectura, lógica de negocio y capacidades técnicas.
+* **Domain Logic:** Reglas de negocio (ej: Aritmética 10^-7, jerarquía de herencia).
+* **System Capabilities:** Límites técnicos (ej: 80M logs/mes, TPS).
+* **Data Flow:** Flujo de información entre microservicios y bases de datos.
+* **Security & IAM:** Roles requeridos y aislamiento de linaje (Ltree).
 
-## 4. Reglas para el Agente en Antigravity
-1. **Sincronización:** Al crear una nueva funcionalidad o microservicio, el agente DEBE proponer los borradores de `PRODUCT.md` y `SYSTEM.md` antes de escribir la primera línea de TypeScript.
-2. **Actualización:** Cada vez que se modifique la lógica de negocio (ej: cambiar la escala de billing o agregar una zona de telecom), el agente debe actualizar el `SYSTEM.md` correspondiente.
-3. **Lenguaje para Humanos:** Ambos archivos deben seguir el estándar de escritura para humanos, evitando tecnicismos innecesarios en `PRODUCT.md` y siendo quirúrgicamente preciso en `SYSTEM.md`.
-4. **Referencia Cruzada:** El agente debe usar estos archivos como guía para asegurar que el código que genera cumple con las capacidades descritas en el sistema.
+---
+
+## 4. Jerarquía y Resumen General
+El agente debe mantener un **"Master Doc"** en la raíz:
+1. **Consolidación:** El `docs/SYSTEM.md` de la raíz debe resumir cómo interactúan todos los sub-módulos.
+2. **Navegabilidad:** El resumen general debe actuar como un índice que enlace a los `docs/` de cada paquete individual.
+
+---
+
+## 5. Reglas para el Agente en Antigravity
+1. **Creación Automática:** Si el agente crea un nuevo paquete o app, DEBE crear automáticamente la carpeta `docs/` y los archivos iniciales.
+2. **Sincronización Previa:** Antes de codificar, el agente debe presentar el borrador de `docs/PRODUCT.md` y `docs/SYSTEM.md`.
+3. **Mantenimiento de Linaje:** Cualquier cambio en el sistema de jerarquía o particionamiento de DB debe actualizar el `docs/SYSTEM.md` global y el local del módulo afectado.
+4. **Referencia Cruzada:** El código generado debe estar comentado haciendo referencia a las capacidades descritas en su respectivo `SYSTEM.md`.
+5. **Lenguaje Dual:** `PRODUCT.md` debe ser legible para un stakeholder; `SYSTEM.md` debe ser quirúrgicamente preciso para un ingeniero.
